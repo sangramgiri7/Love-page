@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Do you love me?</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;1,400&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg1:#ffe3ec; --bg2:#ffc2d4; --ink:#5a1230; --card:rgba(255,255,255,.75);
+  --yes:#e11d58; --yes-ink:#fff; --no:#f3d7e0; --no-ink:#7a2a48;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%;margin:0}
+body{
+  font-family:'Nunito',system-ui,sans-serif;
+  background:linear-gradient(160deg,var(--bg1),var(--bg2));
+  color:var(--ink);
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;padding:20px;overflow-x:hidden;
+}
+.card{
+  width:100%;max-width:520px;text-align:center;
+  background:var(--card);backdrop-filter:blur(8px);
+  border-radius:28px;padding:36px 24px;
+  box-shadow:0 20px 50px rgba(225,29,88,.18);
+  position:relative;z-index:2;
+}
+h1{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:clamp(1.7rem,6vw,2.4rem);margin:0 0 8px;line-height:1.2}
+p.sub{margin:0 0 22px;opacity:.8}
+input{
+  width:100%;font:inherit;font-size:1.1rem;padding:14px 18px;border-radius:16px;
+  border:2px solid transparent;background:#fff;color:#5a1230;text-align:center;outline:none;
+}
+input:focus{border-color:var(--yes)}
+button{font:inherit;font-weight:800;border:0;cursor:pointer;border-radius:999px;transition:transform .2s ease}
+button:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.go{margin-top:16px;padding:14px 32px;background:var(--yes);color:var(--yes-ink);font-size:1.05rem}
+.go:active{transform:scale(.96)}
+.hidden{display:none!important}
+.heart-big{font-size:3.2rem;display:block;animation:beat 1.2s infinite}
+@keyframes beat{0%,100%{transform:scale(1)}15%{transform:scale(1.18)}30%{transform:scale(1)}45%{transform:scale(1.12)}}
+.btns{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:26px;flex-wrap:wrap;min-height:90px}
+.yes{background:var(--yes);color:var(--yes-ink);font-size:1.1rem;padding:14px 34px;box-shadow:0 8px 20px rgba(225,29,88,.35)}
+.no{background:var(--no);color:var(--no-ink);font-size:1.1rem;padding:14px 34px}
+.hint{min-height:1.4em;margin-top:14px;font-style:italic;opacity:.85}
+.letter{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:400;font-size:clamp(1.05rem,3.6vw,1.25rem);line-height:1.75;text-align:left;margin:18px 0 0}
+.letter p{margin:0 0 14px}
+.sign{text-align:right;font-weight:600;font-style:normal}
+.letter.show p{opacity:0;animation:fade 1s forwards}
+.letter.show p:nth-child(1){animation-delay:.2s}
+.letter.show p:nth-child(2){animation-delay:1.4s}
+.letter.show p:nth-child(3){animation-delay:2.6s}
+.letter.show p:nth-child(4){animation-delay:3.8s}
+@keyframes fade{to{opacity:1}}
+.rain{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+.rain span{position:absolute;top:-40px;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(115vh) rotate(40deg);opacity:.6}}
+@media (prefers-reduced-motion:reduce){.heart-big{animation:none}.letter.show p{animation-duration:.01s}}
+</style>
+</head>
+<body>
+<div class="rain" id="rain" aria-hidden="true"></div>
+<main class="card">
+
+  <section id="s1">
+    <span class="heart-big" aria-hidden="true">💌</span>
+    <h1>Hi there, what's your name?</h1>
+    <p class="sub">I have one question for you.</p>
+    <input id="name" type="text" placeholder="Type your name" maxlength="30" autocomplete="off">
+    <button class="go" id="start">Continue</button>
+  </section>
+
+  <section id="s2" class="hidden">
+    <span class="heart-big" aria-hidden="true">🥺</span>
+    <h1 id="ask"></h1>
+    <div class="btns" id="btns">
+      <button class="yes" id="yes">Yes</button>
+      <button class="no" id="no">No</button>
+    </div>
+    <div class="hint" id="hint" aria-live="polite"></div>
+  </section>
+
+  <section id="s3" class="hidden">
+    <span class="heart-big" aria-hidden="true">❤️</span>
+    <h1 id="title"></h1>
+    <div class="letter" id="letter"></div>
+  </section>
+
+</main>
+
+<script>
+(function(){
+  var s1=document.getElementById('s1'), s2=document.getElementById('s2'), s3=document.getElementById('s3');
+  var nameInput=document.getElementById('name'), userName='';
+  var yes=document.getElementById('yes'), no=document.getElementById('no');
+  var hint=document.getElementById('hint');
+  var clicks=0, scale=1;
+  var hints=['Are you sure? 🥹','Think again… 💭','Last chance 😢'];
+
+  function esc(t){var d=document.createElement('div');d.textContent=t;return d.innerHTML;}
+
+  function start(){
+    var v=nameInput.value.trim();
+    if(!v){nameInput.focus();nameInput.placeholder='Please type your name first';return;}
+    userName=v;
+    document.getElementById('ask').textContent=userName+', do you love me?';
+    s1.classList.add('hidden');
+    s2.classList.remove('hidden');
+  }
+  document.getElementById('start').addEventListener('click',start);
+  nameInput.addEventListener('keydown',function(e){if(e.key==='Enter')start();});
+
+  no.addEventListener('click',function(){
+    clicks++;
+    scale+=0.45;
+    yes.style.transform='scale('+scale+')';
+    yes.style.margin=(clicks*10)+'px';
+    hint.textContent=hints[Math.min(clicks-1,hints.length-1)];
+    if(clicks>=3){
+      no.classList.add('hidden');
+      hint.textContent="There's only one answer now 😌";
+    }
+  });
+
+  yes.addEventListener('click',function(){
+    s2.classList.add('hidden');
+    s3.classList.remove('hidden');
+    document.getElementById('title').textContent='I knew it, '+userName+' ❤️';
+    var l=document.getElementById('letter');
+    l.innerHTML=
+      '<p>'+esc(userName)+', you are the quiet joy in my ordinary days, the smile I carry from morning to night. Every moment feels softer, warmer and brighter with you in it. ❤️</p>'+
+      "<p>With you I have found a home that isn't a place, just a feeling: safe, gentle and endlessly kind. Your laughter is my favorite sound, and your presence is my favorite place to be.</p>"+
+      '<p>If I could, I would hand you the stars one by one, but all I have is a heart that is yours, today, tomorrow and for every sunrise after.</p>'+
+      '<p class="sign">Forever yours, with all my love 💖</p>';
+    l.classList.add('show');
+    hearts();
+  });
+
+  function hearts(){
+    var rain=document.getElementById('rain');
+    var set=['❤️','💖','💕','💗','💘'];
+    var n=0;
+    var t=setInterval(function(){
+      var s=document.createElement('span');
+      s.textContent=set[Math.floor(Math.random()*set.length)];
+      s.style.left=Math.random()*100+'vw';
+      s.style.fontSize=(16+Math.random()*26)+'px';
+      s.style.animationDuration=(4+Math.random()*4)+'s';
+      rain.appendChild(s);
+      setTimeout(function(){s.remove();},8500);
+      if(++n>70)clearInterval(t);
+    },180);
+  }
+})();
+</script>
+</body>
+</html>
